@@ -160,3 +160,7 @@ Endpoints:
 ## 📄 License
 
 Distributed under the [MIT License](LICENSE).
+
+
+## Link
+https://aistudio.google.com/apps/1a7d90fb-2878-4371-a3b0-170b65d33f99?project=gen-lang-client-0446141622&showAssistant=true&showPreview=true&fullscreenApplet=true
