@@ -1,0 +1,201 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Workspace {
+  id        String     @id @default(uuid())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  documents Document[]
+  usageLogs UsageLog[]
+
+  @@map("workspaces")
+}
+
+model Document {
+  id               String            @id @default(uuid())
+  workspaceId      String
+  workspace        Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  title            String
+  currentVersionId String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  archivedAt       DateTime?
+  versions         DocumentVersion[]
+  analyses         Analysis[]
+  aiAnalyses       AIAnalysis[]
+  rewrites         Rewrite[]
+  citations        Citation[]
+  writingMetrics   WritingMetric[]
+  conversations    Conversation[]
+
+  @@index([workspaceId])
+  @@map("documents")
+}
+
+model DocumentVersion {
+  id            String          @id @default(uuid())
+  documentId    String
+  document      Document        @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  versionNumber Int
+  content       String          @db.Text
+  wordCount     Int
+  createdAt     DateTime        @default(now())
+  analyses      Analysis[]
+  aiAnalyses    AIAnalysis[]
+  citations     Citation[]
+  writingMetrics WritingMetric[]
+
+  @@index([documentId])
+  @@map("document_versions")
+}
+
+model Analysis {
+  id              String            @id @default(uuid())
+  documentId      String
+  document        Document          @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  versionId       String?
+  version         DocumentVersion?  @relation(fields: [versionId], references: [id], onDelete: SetNull)
+  similarityScore Float
+  qualityScore    Float
+  meaningScore    Float
+  createdAt       DateTime          @default(now())
+  matches         SimilarityMatch[]
+
+  @@index([documentId])
+  @@map("analyses")
+}
+
+model SimilarityMatch {
+  id            String   @id @default(uuid())
+  analysisId    String
+  analysis      Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  text          String   @db.Text
+  startPosition Int
+  endPosition   Int
+  similarity    Float
+  category      String
+  reason        String   @db.Text
+
+  @@index([analysisId])
+  @@map("similarity_matches")
+}
+
+model AIAnalysis {
+  id           String        @id @default(uuid())
+  documentId   String
+  document     Document      @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  versionId    String?
+  version      DocumentVersion? @relation(fields: [versionId], references: [id], onDelete: SetNull)
+  aiLikelihood Float
+  confidence   String
+  model        String
+  createdAt    DateTime      @default(now())
+  indicators   AIIndicator[]
+
+  @@index([documentId])
+  @@map("ai_analyses")
+}
+
+model AIIndicator {
+  id            String     @id @default(uuid())
+  analysisId    String
+  aiAnalysis    AIAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  text          String     @db.Text
+  startPosition Int
+  endPosition   Int
+  score         Float
+  indicatorType String
+  explanation   String     @db.Text
+
+  @@index([analysisId])
+  @@map("ai_indicators")
+}
+
+model Rewrite {
+  id            String   @id @default(uuid())
+  documentId    String
+  document      Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  originalText  String   @db.Text
+  rewrittenText String   @db.Text
+  mode          String
+  intensity     String
+  meaningScore  Float
+  createdAt     DateTime @default(now())
+
+  @@index([documentId])
+  @@map("rewrites")
+}
+
+model Citation {
+  id            String          @id @default(uuid())
+  documentId    String
+  document      Document        @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  versionId     String?
+  version       DocumentVersion? @relation(fields: [versionId], references: [id], onDelete: SetNull)
+  citationText  String
+  citationStyle String
+  position      Int
+
+  @@index([documentId])
+  @@map("citations")
+}
+
+model WritingMetric {
+  id                     String          @id @default(uuid())
+  documentId             String
+  document               Document        @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  versionId              String?
+  version                DocumentVersion? @relation(fields: [versionId], references: [id], onDelete: SetNull)
+  wordCount              Int
+  characterCount         Int
+  sentenceCount          Int
+  averageSentenceLength  Float
+  readabilityScore       Float
+  passiveVoicePercentage Float
+  repetitionScore        Float
+  createdAt              DateTime        @default(now())
+
+  @@index([documentId])
+  @@map("writing_metrics")
+}
+
+model Conversation {
+  id         String    @id @default(uuid())
+  documentId String
+  document   Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  createdAt  DateTime  @default(now())
+  messages   Message[]
+
+  @@index([documentId])
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String
+  content        String       @db.Text
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId])
+  @@map("messages")
+}
+
+model UsageLog {
+  id          String    @id @default(uuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  action      String
+  details     String?   @db.Text
+  createdAt   DateTime  @default(now())
+
+  @@index([workspaceId])
+  @@map("usage_logs")
+}

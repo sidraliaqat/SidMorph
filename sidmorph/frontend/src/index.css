@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+@theme {
+  --color-sid-bg: #372C2E;
+  --color-sid-deep: #563727;
+  --color-sid-white: #FFFFFF;
+  --color-sid-lime: #D9E48A;
+  --color-sid-warm: #7A431D;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: #372C2E;
+  color: #FFFFFF;
+  min-height: 100vh;
+}
+
+/* Editorial line decorations */
+.editorial-line {
+  background: linear-gradient(90deg, transparent, rgba(217, 228, 138, 0.4) 50%, transparent);
+}
+
+.warm-border {
+  border-color: rgba(122, 67, 29, 0.35);
+}
+
+.warm-divider {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Subtle grain overlay */
+.grain-overlay {
+  background-image: radial-gradient(rgba(217, 228, 138, 0.04) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+/* Tabular figures for data integrity */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #372C2E;
+}
+::-webkit-scrollbar-thumb {
+  background: #563727;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #7A431D;
+}

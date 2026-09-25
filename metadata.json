@@ -1,0 +1,6 @@
+{
+  "name": "SIDMORPH — AI Writing Transformation & Originality Platform",
+  "description": "Rewrite. Refine. Preserve Meaning. AI-powered writing transformation, potential textual overlap detection, AI-writing indicators, semantic verification, and citation integrity platform.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

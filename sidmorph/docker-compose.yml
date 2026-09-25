@@ -1,0 +1,63 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sidmorph-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: sidmorph
+      POSTGRES_PASSWORD: sidmorph_secure_pass
+      POSTGRES_DB: sidmorph_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sidmorph -d sidmorph_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: sidmorph-backend
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PORT: 5000
+      DATABASE_URL: "postgresql://sidmorph:sidmorph_secure_pass@postgres:5432/sidmorph_db?schema=public"
+      AI_SERVICE_URL: "http://ai-service:8000"
+      GEMINI_API_KEY: "${GEMINI_API_KEY}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY}"
+      AI_PROVIDER: "gemini"
+    ports:
+      - "5000:5000"
+
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    container_name: sidmorph-ai-service
+    restart: always
+    environment:
+      PORT: 8000
+      OPENAI_API_KEY: "${OPENAI_API_KEY}"
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: sidmorph-frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+volumes:
+  pgdata:
